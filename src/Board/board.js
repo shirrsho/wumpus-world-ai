@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import './board.css';
-import agent from'./agent.png';
+import agent from './agent.png';
+import wumpus from './wumpus.png';
+import gold from './gold.png'
 
 /*
     Cell classes:
@@ -25,12 +27,41 @@ const Board = () => {
 	const col_count = 10;
 	const [cells, setCells] = useState(Array(row_count*col_count).fill(''));
     const [agentAddress, setAgentAddress] = useState(27);
+	const [wumpusAddress, setWumpusAddress] = useState(67);
+	const [goldAddress, setGoldAddress] = useState(97);
+	const [visibility, setVisibility] = useState(Array(row_count*col_count).fill('unvisited'))
+	
+	const agentvisits = (num) => {
+		let boxes = [...cells]
+		let visibilities = [...visibility]
+		visibilities[num] = 'breeze'
+		setAgentAddress(num)
+		setVisibility(visibilities)
+		setCells(boxes)
+		console.log(cells[num])
+	}
 
 	const Cell = ({ num }) => {
-		return <td onClick={() => setAgentAddress(num)}>
+		return <td onClick={() => agentvisits(num)} className={visibility[num]}>
                     <div className={cells[num]}>
-                        {num==agentAddress?
-                            <img src={agent} height={60} width={60}/>:<></>}
+                        {
+							num==agentAddress?
+                            	<img src={agent} height={50} width={50}/>
+								:
+								<></>
+						}
+						{
+							num==wumpusAddress?
+                            	<img src={wumpus} height={50} width={50}/>
+								:
+								<></>
+						}
+						{
+							num==goldAddress?
+                            	<img src={gold} height={50} width={50}/>
+								:
+								<></>
+						}
                     </div>
             </td>;
 	};
