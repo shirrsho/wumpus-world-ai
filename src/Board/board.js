@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import useKeypress from 'react-use-keypress';
 import './board.css';
 import agent from './agent.png';
 import wumpus from './wumpus.png';
@@ -9,7 +10,7 @@ import gold from './gold.png'
     =============
     - unvisited (blurred)
     - safe
-    - stinky
+    - stench
     - breeze
     - agentsafe
     - agentstinky
@@ -27,22 +28,27 @@ const Board = () => {
 	const col_count = 10;
 	const [cells, setCells] = useState(Array(row_count*col_count).fill(''));
     const [agentAddress, setAgentAddress] = useState(27);
-	const [wumpusAddress, setWumpusAddress] = useState(67);
-	const [goldAddress, setGoldAddress] = useState(97);
-	const [visibility, setVisibility] = useState(Array(row_count*col_count).fill('unvisited'))
+	const [wumpusAddress, setWumpusAddress] = useState([67]);
+	const [goldAddress, setGoldAddress] = useState([97]);
+	const [cellState, setcellState] = useState(Array(row_count*col_count).fill('unvisited'))
+
+	const initiateBoard = () => {
+
+	}
 	
-	const agentvisits = (num) => {
+	const agentvisits = (to) => {
+		//console.log();
 		let boxes = [...cells]
-		let visibilities = [...visibility]
-		visibilities[num] = 'breeze'
-		setAgentAddress(num)
-		setVisibility(visibilities)
+		let cellStates = [...cellState]
+		cellStates[to] = 'visited'
+		setAgentAddress(to)
+		setcellState(cellStates)
 		setCells(boxes)
-		console.log(cells[num])
+		//console.log(cells[num])
 	}
 
 	const Cell = ({ num }) => {
-		return <td onClick={() => agentvisits(num)} className={visibility[num]}>
+		return <td className={cellState[num]}>
                     <div className={cells[num]}>
                         {
 							num==agentAddress?
@@ -65,6 +71,39 @@ const Board = () => {
                     </div>
             </td>;
 	};
+
+	useKeypress(['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'], (event) => {
+		if (event.key === 'ArrowLeft') {
+			if(agentAddress%10 != 0) agentvisits(agentAddress - 1)
+		}
+		if (event.key === 'ArrowRight') {
+			if((agentAddress+1)%10 != 0) agentvisits(agentAddress + 1)
+		}
+		if (event.key === 'ArrowUp') {
+			if(agentAddress-10 >= 0) agentvisits(agentAddress - 10)
+		}
+		if (event.key === 'ArrowDown') {
+			if(agentAddress+10 < 100) agentvisits(agentAddress + 10)
+		}
+	});
+
+	// useEffect(() => {
+	// 		window.addEventListener('keypress', e => {
+	// 			console.log(e.key);
+	// 			if(e.key === 'w'){
+	// 				agentvisits(agentAddress - 10)
+	// 			}
+	// 			if(e.key === 's'){
+	// 				agentvisits(agentAddress + 10)
+	// 			}
+	// 			if(e.key === 'a'){
+	// 				agentvisits(agentAddress + 1)
+	// 			}
+	// 			if(e.key === 'd'){
+	// 				agentvisits(agentAddress - 1)
+	// 			}
+	// 		})
+	// })
 
     var t = 0;
 
