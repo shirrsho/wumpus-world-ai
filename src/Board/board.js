@@ -26,14 +26,58 @@ import gold from './gold.png'
 const Board = () => {
 	const row_count = 10;
 	const col_count = 10;
-	const [cells, setCells] = useState(Array(row_count*col_count).fill(''));
+	let gameStarted = false;
+	let input = Array(row_count*col_count)
+		input = [
+				'A','S','S','S','S','S','S','S','S','S',
+				'S','S','S','S','S','S','S','S','S','S',
+				'S','S','W','S','S','G','S','S','S','S',
+				'S','S','S','S','S','S','S','S','S','S',
+				'S','S','S','S','G','S','S','S','S','S',
+				'S','S','W','S','S','S','P','S','S','S',
+				'S','S','S','S','S','S','S','S','S','S',
+				'S','S','S','S','S','S','S','S','S','S',
+				'S','S','S','S','S','S','S','S','S','S',
+				'S','S','S','S','S','S','S','S','S','S'
+			];
+	const [cells, setCells] = useState(input);
     const [agentAddress, setAgentAddress] = useState(27);
 	const [wumpusAddress, setWumpusAddress] = useState([67]);
+	const [pitAddress, setPitAddress] = useState([37]);
 	const [goldAddress, setGoldAddress] = useState([97]);
 	const [cellState, setcellState] = useState(Array(row_count*col_count).fill('unvisited'))
-
+	const [move, setMove] = useState(true)
+	
+	const startGame = () => {
+		initiateBoard()
+		console.log(cells);
+		gameStarted = true;
+	}
+	//startGame()
 	const initiateBoard = () => {
-
+		
+			//setCells(oldArray => [...oldArray, input]);
+		setCells(input)
+		console.log(input);
+		for (let i = 0; i < cells.length; i++) {
+			if(cells[i]=='W'){
+				const arr = [...wumpusAddress]
+				arr.push(i)
+				//setWumpusAddress(wumpus => [...wumpus,i])
+				setWumpusAddress([arr])
+				console.log(arr)
+			}
+			else if(cells[i]=='G'){
+				let arr = [...goldAddress]
+				arr.concat(i)
+				setGoldAddress(arr)
+			}
+			if(cells[i]=='P'){
+				let arr = [...pitAddress]
+				arr.concat(i)
+				setPitAddress(arr)
+			}
+		}
 	}
 	
 	const agentvisits = (to) => {
@@ -45,6 +89,7 @@ const Board = () => {
 		setcellState(cellStates)
 		setCells(boxes)
 		//console.log(cells[num])
+		setMove(!move)
 	}
 
 	const Cell = ({ num }) => {
@@ -87,28 +132,16 @@ const Board = () => {
 		}
 	});
 
-	// useEffect(() => {
-	// 		window.addEventListener('keypress', e => {
-	// 			console.log(e.key);
-	// 			if(e.key === 'w'){
-	// 				agentvisits(agentAddress - 10)
-	// 			}
-	// 			if(e.key === 's'){
-	// 				agentvisits(agentAddress + 10)
-	// 			}
-	// 			if(e.key === 'a'){
-	// 				agentvisits(agentAddress + 1)
-	// 			}
-	// 			if(e.key === 'd'){
-	// 				agentvisits(agentAddress - 1)
-	// 			}
-	// 		})
-	// })
+	useEffect(() => {
+		console.log("effect");
+		if(gameStarted) setTimeout(() => {  agentvisits(agentAddress+1) }, 2000);
+	})
 
     var t = 0;
 
 	return (
 		<div className='container mt-5'>
+			<button onClick={startGame}>Start Game</button>
 			<table className="box">
 				<tbody>
 					<tr>
