@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import useKeypress from 'react-use-keypress';
 import './board.css';
-import agent from './agent.png';
-import wumpus from './wumpus.png';
-import gold from './gold.png'
+import agent from '../images/agent.png'
+import wumpus from '../images/wumpus.png';
+import gold from '../images/gold.png'
 
 /*
     Cell classes:
@@ -42,7 +42,7 @@ const Board = () => {
 			];
 	const [cells, setCells] = useState(input);
     const [agentAddress, setAgentAddress] = useState(27);
-	const [wumpusAddress, setWumpusAddress] = useState([67]);
+	const [wumpusAddress, setWumpusAddress] = useState(Array(row_count*col_count).fill(-1));
 	const [pitAddress, setPitAddress] = useState([37]);
 	const [goldAddress, setGoldAddress] = useState([97]);
 	const [cellState, setcellState] = useState(Array(row_count*col_count).fill('unvisited'))
@@ -50,7 +50,7 @@ const Board = () => {
 	
 	const startGame = () => {
 		initiateBoard()
-		console.log(cells);
+		//console.log(cells);
 		gameStarted = true;
 	}
 	//startGame()
@@ -58,14 +58,16 @@ const Board = () => {
 		
 			//setCells(oldArray => [...oldArray, input]);
 		setCells(input)
-		console.log(input);
+		//console.log(input);
+		//console.log(cells);
 		for (let i = 0; i < cells.length; i++) {
 			if(cells[i]=='W'){
 				const arr = [...wumpusAddress]
-				arr.push(i)
+				arr[i] = i;
+				//arr.push(i)
 				//setWumpusAddress(wumpus => [...wumpus,i])
-				setWumpusAddress([arr])
-				console.log(arr)
+				setWumpusAddress(arr)
+				console.log(wumpusAddress)
 			}
 			else if(cells[i]=='G'){
 				let arr = [...goldAddress]
@@ -97,19 +99,19 @@ const Board = () => {
                     <div className={cells[num]}>
                         {
 							num==agentAddress?
-                            	<img src={agent} height={50} width={50}/>
+                            	<img src={agent} height={70} width={70}/>
 								:
 								<></>
 						}
 						{
 							num==wumpusAddress?
-                            	<img src={wumpus} height={50} width={50}/>
+                            	<img src={wumpus} height={70} width={70}/>
 								:
 								<></>
 						}
 						{
 							num==goldAddress?
-                            	<img src={gold} height={50} width={50}/>
+                            	<img src={gold} height={70} width={70}/>
 								:
 								<></>
 						}
@@ -133,7 +135,7 @@ const Board = () => {
 	});
 
 	useEffect(() => {
-		console.log("effect");
+		//console.log("effect");
 		if(gameStarted) setTimeout(() => {  agentvisits(agentAddress+1) }, 2000);
 	})
 
