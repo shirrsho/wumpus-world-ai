@@ -16,14 +16,14 @@ table td {
 	background-color: black;
 }
 
-.visited {
+.safe {
 	background-color: rgb(179, 202, 145);
 }
 
-.stinky {
+.stench {
 	background-color: rgb(86, 86, 247);
 }
 
-.breezy {
+.breeze {
 	background-color: aquamarine;
 }
