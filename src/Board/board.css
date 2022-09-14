@@ -6,7 +6,7 @@
 }
 
 table td {
-	border: 0.5px solid grey;
+	border: 1px solid grey;
 	width: 80px;
 	height: 80px;
 }
@@ -20,10 +20,10 @@ table td {
 	background-color: rgb(179, 202, 145);
 }
 
-.stench {
+.stinky {
 	background-color: rgb(86, 86, 247);
 }
 
-.breeze {
+.breezy {
 	background-color: aquamarine;
 }
