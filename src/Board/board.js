@@ -9,7 +9,7 @@ import pit from '../images/pit.png'
 import stenchagent from '../images/stench.png'
 import breezeagent from '../images/breeze.png'
 import breezestench from '../images/breeze_stench.png'
-import { BoardState } from './BoardState';
+import { BoardState, CellProperty } from './BoardState';
 
 /*
     Cell classes:
@@ -32,10 +32,10 @@ import { BoardState } from './BoardState';
 const Board = () => {
 
 	let input = [
-				'A','S','S','S','S','S','S','S','S','S',
-				'S','S','S','S','S','S','S','S','S','S',
-				'S','S','W','S','S','G','S','S','S','S',
-				'S','S','S','S','S','S','S','S','S','S',
+				'A','S','S','W','S','S','S','S','S','S',
+				'S','S','P','S','S','S','S','S','S','S',
+				'S','P','W','S','S','G','S','S','S','S',
+				'W','S','S','P','S','S','S','S','S','S',
 				'S','S','S','S','G','S','S','S','S','S',
 				'S','S','S','S','S','S','P','S','S','S',
 				'S','S','S','S','S','S','S','S','S','S',
@@ -45,36 +45,57 @@ const Board = () => {
 			];
 	const [boardState, setBoardState] = useState(new BoardState(input))
 	//let boardState = new BoardState(input)
-    const [agentAddress, setAgentAddress] = useState(0);
+    const [agentAddress, setAgentAddress] = useState(boardState.getInitialAgentAddress());
 
 	const agentVisits = (to) => {
-		boardState.agentVisits(agentAddress,to)
 		setAgentAddress(to)
+		boardState.agentVisits(to)
 		setBoardState(boardState)
 	}
 
-	const goAgent = (from, to) => {
-		if(from==to) return;
-		agentVisits(from+1)
-		setTimeout(()=>{goAgent(from+1,to)},1000)
+	function GoAgent(tempAgent){
+		console.log(tempAgent);
+		setAgentAddress(tempAgent)
+		boardState.agentVisits(tempAgent)
+		setBoardState(boardState)
+		
+		let connections = Array.from(boardState.getPossibleMovesFromCell(tempAgent))
+		console.log("sda");
+
+		for (let i = 0; i < connections.length; i++) {
+			if(boardState.getIsCellVisited(connections[i])) continue
+			setTimeout(()=>{GoAgent(connections[i])},2000)
+			setAgentAddress(tempAgent)
+			boardState.agentVisits(tempAgent)
+			setBoardState(boardState)
+		}
+		setAgentAddress(tempAgent)
+		boardState.agentVisits(tempAgent)
+		setBoardState(boardState)
+		// if(from==to) return;
+		// agentVisits(from+1)
+		// // console.log(boardState.getCellClass(from+1));
+		// setTimeout(()=>{GoAgent(from+1,to)},1000)
+
 	}
+
 	const Cell = ({ num }) => {
-		return <td className={boardState.getCellState(num)}>
+		return <td className={boardState.getCellClass(num)}>
                     <div>
                         {
-							num == agentAddress && (boardState.getCellState(num) === 'safe' || boardState.getCellState(num) === 'unvisited') ?
+							num == agentAddress && (boardState.getCellClass(num) === 'safe' || boardState.getCellClass(num) === 'unvisited') ?
                             	<img src={agent} alt="agent" height={70} width={70}/>
 								:
 								<></>
 						}
 						{
-							num == agentAddress && boardState.getCellState(num) === 'stench' ?
+							num == agentAddress && boardState.getCellClass(num) === 'stench' ?
                             	<img src={stenchagent} alt="stenchagent" height={70} width={70}/>
 								:
 								<></>
 						}
 						{
-							num == agentAddress && boardState.getCellState(num) === 'breeze' ?
+							num == agentAddress && boardState.getCellClass(num) === 'breeze' ?
                             	<img src={breezeagent} alt="breezeagent" height={70} width={70}/>
 								:
 								<></>
@@ -101,7 +122,11 @@ const Board = () => {
             </td>;
 	};
 
-	useKeypress(['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown','Enter'], (event) => {
+	useEffect(() => {
+		console.log('useEffect ran.');
+	  }, [boardState]);
+
+	useKeypress(['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown','Enter','Space'], (event) => {
 		if (event.key === 'ArrowLeft') {
 			if(agentAddress%10 !== 0) agentVisits(agentAddress - 1)
 		}
@@ -115,7 +140,7 @@ const Board = () => {
 			if(agentAddress+10 < 100) agentVisits(agentAddress + 10)
 		}
 		if (event.key === 'Enter') {
-			goAgent(0,9)
+			GoAgent(agentAddress)
 		}
 	});
 
