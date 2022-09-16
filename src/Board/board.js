@@ -47,31 +47,32 @@ const Board = () => {
 	//let boardState = new BoardState(input)
     const [agentAddress, setAgentAddress] = useState(boardState.getInitialAgentAddress());
 
-	const agentVisits = (to) => {
-		setAgentAddress(to)
-		boardState.agentVisits(to)
-		setBoardState(boardState)
+	function agentVisits(to){
+		return new Promise(resolve => {
+			setAgentAddress(to)
+			boardState.agentVisits(to)
+			setTimeout(()=>{setBoardState(boardState);console.log("age")},1000)
+		});
 	}
 
-	function GoAgent(tempAgent){
+	async function GoAgent(tempAgent){
 		console.log(tempAgent);
-		setAgentAddress(tempAgent)
-		boardState.agentVisits(tempAgent)
-		setBoardState(boardState)
-		
+		try{
+		const result = await agentVisits(tempAgent) 
+		console.log(result); // why this shitty line not running
+		} catch{
+			console.log("hoini");
+		}
 		let connections = Array.from(boardState.getPossibleMovesFromCell(tempAgent))
 		console.log("sda");
 
 		for (let i = 0; i < connections.length; i++) {
 			if(boardState.getIsCellVisited(connections[i])) continue
-			setTimeout(()=>{GoAgent(connections[i])},2000)
-			setAgentAddress(tempAgent)
-			boardState.agentVisits(tempAgent)
-			setBoardState(boardState)
+			await GoAgent(connections[i])
+			await agentVisits(tempAgent)
 		}
-		setAgentAddress(tempAgent)
-		boardState.agentVisits(tempAgent)
-		setBoardState(boardState)
+		await agentVisits(tempAgent)
+
 		// if(from==to) return;
 		// agentVisits(from+1)
 		// // console.log(boardState.getCellClass(from+1));
