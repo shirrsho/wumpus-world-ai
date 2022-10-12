@@ -34,8 +34,8 @@ const Board = () => {
 	let input = [
 				'A','S','S','W','S','S','S','S','S','S',
 				'S','S','P','S','S','S','S','S','S','S',
-				'S','P','W','S','S','G','S','S','S','S',
-				'W','S','S','P','S','S','S','S','S','S',
+				'S','S','W','S','S','G','S','S','S','S',
+				'S','S','S','P','S','S','S','S','S','S',
 				'S','S','S','S','G','S','S','S','S','S',
 				'S','S','S','S','S','S','P','S','S','S',
 				'S','S','S','S','S','S','S','S','S','S',
@@ -46,39 +46,71 @@ const Board = () => {
 	const [boardState, setBoardState] = useState(new BoardState(input))
 	//let boardState = new BoardState(input)
     const [agentAddress, setAgentAddress] = useState(boardState.getInitialAgentAddress());
+	const [prevagentAddress, setPrevAgentAddress] = useState(Array(100).fill(-1));
+	let visitingSeq = Array(100)
+	let turn = false;
 
 	function agentVisits(to){
-		return new Promise(resolve => {
+		// return new Promise(resolve => {
 			setAgentAddress(to)
 			boardState.agentVisits(to)
-			setTimeout(()=>{setBoardState(boardState);console.log("age")},1000)
-		});
+			setBoardState(boardState);
+		// }).resolve
 	}
 
-	async function GoAgent(tempAgent){
-		console.log(tempAgent);
-		try{
-		const result = await agentVisits(tempAgent) 
-		console.log(result); // why this shitty line not running
-		} catch{
-			console.log("hoini");
+	function GoAgent(){
+		let tempprev = [...prevagentAddress]
+		let unvisiteds = Array.from(boardState.getUnvisitedAdjascents(agentAddress))
+		if(boardState.getCellClass(agentAddress) == 'safe' && unvisiteds.length!=0){
+			console.log(unvisiteds[0]);
+			tempprev[unvisiteds[0]] = agentAddress
+			setPrevAgentAddress(tempprev)
+			agentVisits(unvisiteds[0])
 		}
+		else{
+			console.log("sd");
+			//setPrevAgentAddress(agentAddress)
+			if(prevagentAddress[agentAddress]!=-1)
+				agentVisits(prevagentAddress[agentAddress])
+			else console.log("No move available");
+		}
+		
+	}
+	
+	function getVisitingSeq(tempAgent,ind){
+		visitingSeq[ind] = tempAgent
+		boardState.PossibleMovesForCell(tempAgent)
 		let connections = Array.from(boardState.getPossibleMovesFromCell(tempAgent))
-		console.log("sda");
+		if(connections.length==0) return;
+		console.log(connections);
+		let o = 0;
 
-		for (let i = 0; i < connections.length; i++) {
+		for (let i = 0; i < connections.length;i++) {
 			if(boardState.getIsCellVisited(connections[i])) continue
-			await GoAgent(connections[i])
-			await agentVisits(tempAgent)
+			getVisitingSeq(connections[i],ind++)
+			
+			// setTimeout(()=> GoAgent(connections[i]),2000 )
+			//agentVisits(tempAgent)
 		}
-		await agentVisits(tempAgent)
-
-		// if(from==to) return;
-		// agentVisits(from+1)
-		// // console.log(boardState.getCellClass(from+1));
-		// setTimeout(()=>{GoAgent(from+1,to)},1000)
-
 	}
+
+	useKeypress(['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown','Enter'], (event) => {
+		if (event.key === 'ArrowLeft') {
+			if(agentAddress%10 !== 0) agentVisits(agentAddress - 1)
+		}
+		if (event.key === 'ArrowRight') {
+			if((agentAddress+1)%10 !== 0) agentVisits(agentAddress + 1)
+		}
+		if (event.key === 'ArrowUp') {
+			if(agentAddress-10 >= 0) agentVisits(agentAddress - 10)
+		}
+		if (event.key === 'ArrowDown') {
+			if(agentAddress+10 < 100) agentVisits(agentAddress + 10)
+		}
+		if (event.key === 'Enter') {
+			GoAgent()
+		}
+	});
 
 	const Cell = ({ num }) => {
 		return <td className={boardState.getCellClass(num)}>
@@ -122,28 +154,6 @@ const Board = () => {
                     </div>
             </td>;
 	};
-
-	useEffect(() => {
-		console.log('useEffect ran.');
-	  }, [boardState]);
-
-	useKeypress(['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown','Enter','Space'], (event) => {
-		if (event.key === 'ArrowLeft') {
-			if(agentAddress%10 !== 0) agentVisits(agentAddress - 1)
-		}
-		if (event.key === 'ArrowRight') {
-			if((agentAddress+1)%10 !== 0) agentVisits(agentAddress + 1)
-		}
-		if (event.key === 'ArrowUp') {
-			if(agentAddress-10 >= 0) agentVisits(agentAddress - 10)
-		}
-		if (event.key === 'ArrowDown') {
-			if(agentAddress+10 < 100) agentVisits(agentAddress + 10)
-		}
-		if (event.key === 'Enter') {
-			GoAgent(agentAddress)
-		}
-	});
 
     var t = 0;
 
