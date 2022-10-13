@@ -1,3 +1,38 @@
 .menu {
     background-color: #93032E;
 }
+
+.btn {
+    background: #f1ac86;
+    background-image: -webkit-linear-gradient(top, #f1ac86, #f7dba7);
+    background-image: -moz-linear-gradient(top, #f1ac86, #f7dba7);
+    background-image: -ms-linear-gradient(top, #f1ac86, #f7dba7);
+    background-image: -o-linear-gradient(top, #f1ac86, #f7dba7);
+    background-image: linear-gradient(to bottom, #f1ac86, #f7dba7);
+    -webkit-border-radius: 13;
+    -moz-border-radius: 13;
+    border-radius: 13px;
+    -webkit-box-shadow: 0px 1px 3px #666666;
+    -moz-box-shadow: 0px 1px 3px #666666;
+    box-shadow: 0px 1px 3px #666666;
+    font-family: Courier New;
+    color: #000000;
+    font-size: 20px;
+    padding: 10px 20px 10px 20px;
+    border: solid #f79a6e 3px;
+    text-decoration: none;
+  }
+  
+  .btn:hover {
+    background: #ffe76d;
+    background-image: -webkit-linear-gradient(top, #ffe76d, #e4cd37);
+    background-image: -moz-linear-gradient(top, #ffe76d, #e4cd37);
+    background-image: -ms-linear-gradient(top, #ffe76d, #e4cd37);
+    background-image: -o-linear-gradient(top, #ffe76d, #e4cd37);
+    background-image: linear-gradient(to bottom, #ffe76d, #e4cd37);
+    text-decoration: none;
+  }
+
+  .img-menu {
+    
+  }
