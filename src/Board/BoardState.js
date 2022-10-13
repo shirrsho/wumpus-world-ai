@@ -10,6 +10,12 @@ class CellProperty {
     connections = new Set()
     possibleMoves = new Set()
 
+    getProperties(){
+        return{
+            p:this.pitProbability,
+            w:this.wumpusProbability
+        }
+    }
     setSafe(){
         this.wumpusProbability = 0
         this.pitProbability = 0
@@ -17,14 +23,22 @@ class CellProperty {
         this.safeProbability = 1
     }
     setWumpusProbability(){
-        if(this.safeProbability===1) this.wumpusProbability = 0
-        else this.wumpusProbability = NaN
-        this.setRiskProbability()
+        if(this.safeProbability!==1 && this.wumpusProbability!=-1)
+            this.wumpusProbability = 1
     }
     setPitProbability(){
-        if(this.safeProbability===1) this.pitProbability = 0
-        else this.pitProbability = NaN
-        this.setRiskProbability()
+        if(this.safeProbability!==1 && this.pitProbability!=-1)
+            this.pitProbability = 1
+    }
+    setNoPit(){
+        this.pitProbability = -1
+        if(this.pitProbability==-1 && this.wumpusProbability==-1)
+            this.setSafe()
+    }
+    setNoWumpus(){
+        this.wumpusProbability = -1
+        if(this.wumpusProbability==-1 && this.pitProbability==-1)
+            this.setSafe()
     }
     setRiskProbability(){
         if(this.safeProbability===1) this.riskProbability = 0
@@ -61,6 +75,8 @@ export class BoardState {
         for (let i = 0; i < 100; i++) {
             if(this.input[i]==='A') this.agentAddress = i;
         }
+        this.agentVisits(this.agentAddress)
+        this.cellProperties[this.agentAddress].setSafe()
         //this.setCellClass(this.agentVisits(this.agentAddress))
     }
     row_count = 10
@@ -85,37 +101,47 @@ export class BoardState {
             // this.setConnectionBetweenCells(nowOn)
             // this.setPossibleMovesForCell(nowOn)
 
-            if(this.adjacentHas(nowOn,'W')){
+            if(!this.adjacentHas(nowOn,'W') && !this.adjacentHas(nowOn,'P')) {
+                this.setCellClass(nowOn,'safe')
+                // this.cellClass[nowOn] = 'safe'
+                this.setAllSafe(nowOn)
+            }
+            else if(this.adjacentHas(nowOn,'W') && this.adjacentHas(nowOn,'P')) {
+                this.setCellClass(nowOn,'breezestench')
+                // this.cellClass[nowOn] = 'safe'
+                this.setAllPit(nowOn)
+                this.setAllWumpus(nowOn)
+            }
+            else if(this.adjacentHas(nowOn,'W')){
                 this.setCellClass(nowOn,'stench')
                 // this.cellClass[nowOn] = 'stench'
-                this.cellProperties[nowOn].setWumpusProbability()
+                this.setAllWumpus(nowOn)
+                this.setAllNoPit(nowOn)
             }
 
             else if(this.adjacentHas(nowOn,'P')) {
                 this.setCellClass(nowOn,'breeze')
                 // this.cellClass[nowOn] = 'breeze'
-                this.cellProperties[nowOn].setPitProbability()
+                this.setAllPit(nowOn)
+                this.setAllNoWumpus(nowOn)
             }
 
-            else {
-                this.setCellClass(nowOn,'safe')
-                // this.cellClass[nowOn] = 'safe'
-                // this.setAllSafe(nowOn)
-            }
         }
+
+        //console.log(this.getCellProps(nowOn));
 
         return 'safe'
     }
 
-    getUnvisitedAdjascents(nowOn){
+    getUnvisitedAdjascents(nowOn,unvstdonly){
         let ret = new Set()
-        if(nowOn % 10 !== 0 && this.getCellClass(nowOn-1)=='unvisited')
+        if(nowOn-1>=0)if(nowOn % 10 !== 0 && this.cellProperties[nowOn-1].getIsCellSafe() && (this.getCellClass(nowOn-1)=='unvisited' || !unvstdonly))
             ret.add(nowOn-1)
-        if(nowOn+1 % 10 !== 0 && this.getCellClass(nowOn+1)=='unvisited')
+        if(nowOn+1<100)if(nowOn+1 % 10 !== 0 && this.cellProperties[nowOn+1].getIsCellSafe() && (this.getCellClass(nowOn+1)=='unvisited' || !unvstdonly))
             ret.add(nowOn+1)
-        if(nowOn-10 >= 0 && this.getCellClass(nowOn-10)=='unvisited')
+        if(nowOn-10>=0)if(nowOn-10 >= 0 && this.cellProperties[nowOn-10].getIsCellSafe() && (this.getCellClass(nowOn-10)=='unvisited' || !unvstdonly))
             ret.add(nowOn-10)
-        if(nowOn+10 < 100 && this.getCellClass(nowOn+10)=='unvisited')
+        if(nowOn+10<100)if(nowOn+10 < 100 && this.cellProperties[nowOn+10].getIsCellSafe() && (this.getCellClass(nowOn+10)=='unvisited' || !unvstdonly))
             ret.add(nowOn+10)
         return ret
     }
@@ -167,18 +193,43 @@ export class BoardState {
     //     }
     // }
 
-    // setAllSafe(index){
-	// 	this.cellProperties[index].setSafe()
-	// 	if(index	%10 !== 0) 	    this.cellProperties[index-1].setSafe()
-	// 	if((index+1)%10 !== 0) 	    this.cellProperties[index+1].setSafe()
-	// 	if((index-10)	>= 	0) 	    this.cellProperties[index-10].setSafe()
-	// 	if((index+10)    < 	100)    this.cellProperties[index+10].setSafe()
-	// }
+    setAllSafe(index){
+		if(index	%10 !== 0) 	    this.cellProperties[index-1].setSafe()
+		if((index+1)%10 !== 0) 	    this.cellProperties[index+1].setSafe()
+		if((index-10)	>= 	0) 	    this.cellProperties[index-10].setSafe()
+		if((index+10)    < 	100)    this.cellProperties[index+10].setSafe()
+	}
+    setAllPit(index){
+		if(index-1>=0)if(index	%10 !== 0) 	    this.cellProperties[index-1].setPitProbability()
+		if(index+1<100)if((index+1)%10 !== 0) 	    this.cellProperties[index+1].setPitProbability()
+		if(index-10>=0)if((index-10)	>= 	0) 	    this.cellProperties[index-10].setPitProbability()
+		if(index+10<100)if((index+10)    < 	100)    this.cellProperties[index+10].setPitProbability()
+	}
+    setAllWumpus(index){
+		if(index-1>=0)if(index	%10 !== 0) 	    this.cellProperties[index-1].setWumpusProbability()
+		if(index+1<100)if((index+1)%10 !== 0) 	    this.cellProperties[index+1].setWumpusProbability()
+		if(index-10>=0)if((index-10)	>= 	0) 	    this.cellProperties[index-10].setWumpusProbability()
+		if(index+10<100)if((index+10)    < 	100)    this.cellProperties[index+10].setWumpusProbability()
+	}
+    setAllNoPit(index){
+		if(index+-1>=0)if(index	%10 !== 0) 	    this.cellProperties[index-1].setNoPit()
+		if(index+1<100)if((index+1)%10 !== 0) 	    this.cellProperties[index+1].setNoPit()
+		if(index-10>=0)if((index-10)	>= 	0) 	    this.cellProperties[index-10].setNoPit()
+		if(index+10<100)if((index+10)    < 	100)    this.cellProperties[index+10].setNoPit()
+	}
+    setAllNoWumpus(index){
+		if(index-1>=0)if(index	%10 !== 0) 	    this.cellProperties[index-1].setNoWumpus()
+		if(index+1<100)if((index+1)%10 !== 0) 	    this.cellProperties[index+1].setNoWumpus()
+		if(index-10>=0)if((index-10)	>= 	0) 	    this.cellProperties[index-10].setNoWumpus()
+		if(index+10<100)if((index+10)    < 	100)    this.cellProperties[index+10].setNoWumpus()
+	}
 
     // getIsCellSafe(whichCell){
     //     return this.cellProperties[whichCell].getIsCellSafe()
     // }
-    
+    getCellProps(index){
+        return this.cellProperties[index].getProperties()
+    }
     getCellClass(index){return this.cellClass[index]}
 
     setCellClass(index,whichClass){this.cellClass[index] = whichClass}
@@ -202,12 +253,14 @@ export class BoardState {
     }
 
     adjacentHas(index,thing){
+        console.log(this.getCellProps(index));
         if(
             (index+1)%10 != 0 && this.input[index+1] === thing ||
             (index)%10 != 0   && this.input[index-1] === thing ||
             (index+10) < 100  && this.input[index+10]=== thing ||
             (index-10) >= 0   && this.input[index-10]=== thing
           ) return true;
+        else return false
     }
 
     getInitialAgentAddress(){

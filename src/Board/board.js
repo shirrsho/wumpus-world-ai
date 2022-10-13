@@ -32,8 +32,8 @@ import { BoardState, CellProperty } from './BoardState';
 const Board = () => {
 
 	let input = [
-				'A','S','S','W','S','S','S','S','S','S',
-				'S','S','P','S','S','S','S','S','S','S',
+				'A','S','P','W','S','S','S','S','S','S',
+				'S','S','S','S','S','S','S','S','S','S',
 				'S','S','W','S','S','G','S','S','S','S',
 				'S','S','S','P','S','S','S','S','S','S',
 				'S','S','S','S','G','S','S','S','S','S',
@@ -47,7 +47,7 @@ const Board = () => {
 	//let boardState = new BoardState(input)
     const [agentAddress, setAgentAddress] = useState(boardState.getInitialAgentAddress());
 	const [prevagentAddress, setPrevAgentAddress] = useState(Array(100).fill(-1));
-	let visitingSeq = Array(100)
+	let visitedfromthisAddress = Array(100).fill(new Set())
 	let turn = false;
 
 	function agentVisits(to){
@@ -57,41 +57,44 @@ const Board = () => {
 			setBoardState(boardState);
 		// }).resolve
 	}
-
+	function shuffle(a) {
+		var j, x, i;
+		for (i = a.length - 1; i > 0; i--) {
+			j = Math.floor(Math.random() * (i + 1));
+			x = a[i];
+			a[i] = a[j];
+			a[j] = x;
+		}
+		return a;
+	}
+	let unvstdonly = true;
 	function GoAgent(){
+		console.log("11",boardState.getCellProps(0));
 		let tempprev = [...prevagentAddress]
-		let unvisiteds = Array.from(boardState.getUnvisitedAdjascents(agentAddress))
-		if(boardState.getCellClass(agentAddress) == 'safe' && unvisiteds.length!=0){
+		let unvisiteds = Array.from(boardState.getUnvisitedAdjascents(agentAddress,unvstdonly))
+		unvisiteds = shuffle(unvisiteds)
+		if(/*boardState.getCellClass(agentAddress) == 'safe' && */unvisiteds.length!=0){
 			console.log(unvisiteds[0]);
 			tempprev[unvisiteds[0]] = agentAddress
 			setPrevAgentAddress(tempprev)
 			agentVisits(unvisiteds[0])
+			unvstdonly = true
 		}
 		else{
 			console.log("sd");
+			//let visit = Array.from(visitedfromthisAddress[agentAddress])
+			
 			//setPrevAgentAddress(agentAddress)
-			if(prevagentAddress[agentAddress]!=-1)
-				agentVisits(prevagentAddress[agentAddress])
-			else console.log("No move available");
+			// if(prevagentAddress[agentAddress]!=-1){
+			// 	agentVisits(prevagentAddress[agentAddress])
+				
+			// }
+			// else {
+			// 	console.log("No move available");
+			// }
+			unvstdonly = false
 		}
 		
-	}
-	
-	function getVisitingSeq(tempAgent,ind){
-		visitingSeq[ind] = tempAgent
-		boardState.PossibleMovesForCell(tempAgent)
-		let connections = Array.from(boardState.getPossibleMovesFromCell(tempAgent))
-		if(connections.length==0) return;
-		console.log(connections);
-		let o = 0;
-
-		for (let i = 0; i < connections.length;i++) {
-			if(boardState.getIsCellVisited(connections[i])) continue
-			getVisitingSeq(connections[i],ind++)
-			
-			// setTimeout(()=> GoAgent(connections[i]),2000 )
-			//agentVisits(tempAgent)
-		}
 	}
 
 	useKeypress(['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown','Enter'], (event) => {
